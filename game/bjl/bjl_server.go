@@ -299,10 +299,11 @@ func (game *BjlServer) DoBet(p *Game.Player, name string, Type, counts, tableID 
 		index = indexs[i]
 		total = totals[i]
 
-		id := util.UidGenerator.GetId(GThisnaem)
+		id := util.UIDGenerator.GetID(GThisnaem)
+		sid := strconv.FormatInt(id, 10)
 		//数据库扣费操作
 		money := -total
-		ok := models.MoneyAdd(p.Name, &money, 0, Type, "", p.ID, p.Platform)
+		ok := models.MoneyAdd(p.Name, &money, 0, Type, sid, p.ID, p.Platform)
 		if ok == 1 {
 			err = 4
 			break
@@ -313,7 +314,7 @@ func (game *BjlServer) DoBet(p *Game.Player, name string, Type, counts, tableID 
 		bo := Game.NewBettingOrder()
 		bo.ID = id
 		bo.TableID = tableID
-		bo.OrderNumber = strconv.FormatInt(id, 10)
+		bo.OrderNumber = sid
 		bo.GameKind = Type
 		bo.GameBettingKind = index
 		bo.BettingAmount = total
@@ -336,7 +337,7 @@ func (game *BjlServer) DoBet(p *Game.Player, name string, Type, counts, tableID 
 		if !tmp.Create() {
 			//资金回退
 			money = total
-			models.MoneyAdd(p.Name, &money, -1, Type, "", p.ID, p.Platform)
+			models.MoneyAdd(p.Name, &money, -1, Type, sid, p.ID, p.Platform)
 			return 7
 		}
 		table.Orders.Add(bo)

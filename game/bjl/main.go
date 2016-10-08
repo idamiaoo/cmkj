@@ -4,6 +4,7 @@ import (
 	"go/cmkj_server_go/conf"
 	"go/cmkj_server_go/models"
 	//"go/cmkj_server_go/network"
+	"go/cmkj_server_go/models/redis"
 	"go/cmkj_server_go/util"
 
 	//"strconv"
@@ -17,6 +18,9 @@ func init() {
 
 func main() {
 	models.InitDb()
+	redis.Init()
+	util.UIDInit()
+
 	util.InitLog("bjl.log", "DEBUG")
 	Bjl = NewBjl()
 	name := conf.Conf.String("name")

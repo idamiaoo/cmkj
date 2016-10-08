@@ -11,6 +11,16 @@ import (
 //RedisPool  全局redis连接池
 var RedisPool *redis.Pool
 
+//OpenRedis 重redis连接池获取一个连接进行数据库访问
+func OpenRedis() redis.Conn {
+	return RedisPool.Get()
+}
+
+//CloseRedis 释放一个redis连接，终止数据库访问
+func CloseRedis(conn redis.Conn) {
+	conn.Close()
+}
+
 //NewRedisPool 建立redis连接池
 func NewRedisPool(server, password string, db int) *redis.Pool {
 	return &redis.Pool{
