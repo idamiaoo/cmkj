@@ -5,6 +5,7 @@ import (
 	Game "go/cmkj_server_go/game"
 	"go/cmkj_server_go/models"
 	"go/cmkj_server_go/network"
+	"go/cmkj_server_go/network/rpc/uidclient"
 	"go/cmkj_server_go/util"
 
 	"strconv"
@@ -299,7 +300,9 @@ func (game *BjlServer) DoBet(p *Game.Player, name string, Type, counts, tableID 
 		index = indexs[i]
 		total = totals[i]
 
-		id := util.UIDGenerator.GetID(GThisnaem)
+		//id := util.UIDGenerator.GetID(GThisnaem)
+
+		id := uidclient.NextUID(GThisnaem)
 		sid := strconv.FormatInt(id, 10)
 		//数据库扣费操作
 		money := -total

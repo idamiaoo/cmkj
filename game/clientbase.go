@@ -53,7 +53,7 @@ type Client struct {
 	Max  int
 }
 
-//GetGame 获取客户端帮顶的游戏
+//GetGame 获取客户端绑定的游戏
 func (c *Client) GetGame() IGame {
 	return c.Game
 }
@@ -139,6 +139,7 @@ func (c *Client) DoLogin(client IClient, num, t, platform int, name, pwd, xy, ip
 		util.Log.Errorf("num=%d\n", int(num))
 		return 1
 	}
+	var isFirst bool
 	p := c.P
 	p.Name = name
 	p.IP = ip

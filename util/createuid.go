@@ -13,7 +13,7 @@ type UID struct {
 	mutex sync.Mutex
 }
 
-//UIDGenerator 全局id生成器
+//UIDGenerator 全局id生成器实例
 var UIDGenerator *UID
 
 //NewUID 新建一个id生成器

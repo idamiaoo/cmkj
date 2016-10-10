@@ -1,10 +1,6 @@
 package timer
 
-import (
-	"go/cmkj_server_go/util"
-
-	"time"
-)
+import "time"
 
 var GameTimer map[int]int
 
@@ -16,7 +12,7 @@ func StartGameTimer() {
 		case <-trick.C:
 			//util.Log.Debug("game timer")
 			for k, t := range GameTimer {
-				util.Log.Debug(k, t)
+				//util.Log.Debug(k, t)
 				if t > 0 {
 					GameTimer[k] = t - 1
 				}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "RouteGuideProto";
+
+package uidgennerator;
+
+service UIDGennerator{
+    rpc NextUid(Request) returns (Reply) {}
+}
+
+message Request{
+    int32 game = 1; 
+}
+
+message Reply{
+    int64 uid = 1;
+}
+
+

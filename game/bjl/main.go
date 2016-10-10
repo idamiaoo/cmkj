@@ -5,6 +5,7 @@ import (
 	"go/cmkj_server_go/models"
 	//"go/cmkj_server_go/network"
 	"go/cmkj_server_go/models/redis"
+	_ "go/cmkj_server_go/network/rpc/uidclient"
 	"go/cmkj_server_go/util"
 
 	//"strconv"
