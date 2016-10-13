@@ -32,7 +32,7 @@ func ReadMemberUpload() []MemberUpload {
 	return umember
 }
 
-func GetMenberStatus(platform, game int) []MemberUpload {
+func GetMemberStatus(platform, game int) []MemberUpload {
 	var umenber []MemberUpload
 	if err := DBEngine.Db.Where("type = '5' and remark0 = ?", game).Find(&umenber).Error; err != nil {
 		util.Log.Error(err)

@@ -48,7 +48,7 @@ func WriteResult(game, tableid, stage, noSub int, starttime time.Time, result, p
 func ReadResult(game, tableid, stage int) ([]VideoGameResult, error) {
 	var results []VideoGameResult
 	querysql := "select * From [C_VideoGameResult] t1," +
-		" ( select  top 1 stage,AddTime From [C_VideoGameResult] t2 where GameNameID=? and TableID=? order by id desc) t2 " +
+		" ( select top 1 stage,AddTime From [C_VideoGameResult] t2 where GameNameID=? and TableID=? order by id desc) t2 " +
 		"where t2.stage=? and GameNameID=? and TableID=? and t1.Stage = t2.Stage and  DATEDIFF(n,t1.addtime,t2.AddTime)<240  order by id"
 
 	rows, err := DBEngine.Db.Raw(querysql, game, tableid, stage, game, tableid).Rows()

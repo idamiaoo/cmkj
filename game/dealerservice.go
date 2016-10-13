@@ -120,7 +120,7 @@ func (s *DealerService) LoadShuffle() {
 
 //ToDealerStatus ...
 func (s *DealerService) ToDealerStatus() {
-	util.Log.Debug(s.Dealerr.TableID)
+	//util.Log.Debug(s.Dealerr.TableID)
 	s.Dealerr.ToDealerStatus()
 }
 

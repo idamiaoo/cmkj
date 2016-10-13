@@ -45,4 +45,6 @@ func main() {
 		}()
 	}
 	<-time.After(time.Duration(2) * time.Second)
+	fmt.Println(time.Now().Unix(), time.Now().Add(time.Duration(-30)*time.Second).Unix())
+
 }

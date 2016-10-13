@@ -27,33 +27,35 @@ func NewBet() *Bet {
 
 //Player 玩家信息
 type Player struct {
-	ID          int64
-	Name        string
-	Balance     float64
-	Bets        map[int]*Bet
-	Bettime     int64
-	Online      bool
-	Game        int
-	Home        int
-	Vt          int
-	Seat        int
-	Limit       int
-	LimitMin    int
-	Maxprofit   float64
-	ClassID     int
-	IsLock      int
-	Xmmod       string
-	Moneysort   string
-	PreSequence string
-	LoginTime   string
-	IP          string
-	Platform    int
-	Type        int
-	IsTips      int
-	Tips        float64
-	Xy          string
-	Code        int
-	Send        chan []byte
+	ID                int64
+	Name              string
+	Balance           float64
+	Bets              map[int]*Bet
+	Bettime           int64
+	Online            bool
+	Game              int
+	Home              int
+	Vt                int
+	Seat              int
+	Limit             int
+	LimitMin          int
+	Maxprofit         float64
+	ClassID           int
+	IsLock            int
+	Xmmod             string
+	Moneysort         string
+	PreSequence       string
+	LoginTime         string
+	IP                string
+	Platform          int
+	Type              int
+	IsTips            int
+	Tips              float64
+	Xy                string
+	Session           string
+	Code              int
+	Send              chan []byte
+	PromotionOtherURL string
 }
 
 //NewPlayer 新建玩家信息实例

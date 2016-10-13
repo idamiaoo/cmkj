@@ -57,11 +57,12 @@ func (r *RecordRun) Run() {
 }
 
 func (r *RecordRun) updatePlayers() {
+	util.Log.Debug("updatePlayers")
 	table := r.Game.FindTable(r.TableID)
 	if table == nil {
 		return
 	}
-	members := models.GetMenberStatus(0, table.Game)
+	members := models.GetMemberStatus(0, table.Game)
 	var list []*PlayerStatus
 	for _, member := range members {
 		ps := UToPlayStatus(&member)
@@ -88,7 +89,9 @@ func (r *RecordRun) updatePlayers() {
 
 }
 
+//查询是否有无结算的场次
 func (r *RecordRun) checkNotPayoff() {
+	util.Log.Debug("checkNotPayoff")
 	table := r.Game.FindTable(r.TableID)
 	if table.Statu.Status == 1 {
 
@@ -111,6 +114,7 @@ func (r *RecordRun) checkNotPayoff() {
 }
 
 func (r *RecordRun) updateMoneyRun(name []string) {
+	util.Log.Debug("updateMoneyRun")
 	//数据库操作
 	members := models.UpdateMoneyIn(name)
 	if members == nil {

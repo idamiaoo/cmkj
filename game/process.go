@@ -13,18 +13,15 @@ import (
 )
 
 //DoManageCmd  管理命令
-func DoManageCmd(game IGame, p *Player, s chan []byte, cmd, tableid int, args, arg string) byte {
-	if p == nil {
-		util.Log.Debug("nil")
-	}
+func DoManageCmd(game IGame, c *Client, cmd, tableid int, args, arg string) byte {
 	util.Log.Debugf("CMD = %d", cmd)
 	table := game.FindTable(tableid)
 	if cmd == 1000 {
-		return ManageIn(game, p, s, args, arg, tableid)
+		return ManageIn(game, c, args, arg, tableid)
 	}
-	if table.Conf.Manager != p {
+	if table.Conf.Manager != c.P {
 		if cmd == 999 {
-			return MoniIn(game, p, s, args, arg, tableid)
+			return MoniIn(game, c, args, arg, tableid)
 		}
 		if cmd == 1011 {
 			table.Statu.WinLose = 0
@@ -90,12 +87,12 @@ func Start(game IGame, tableid int, args, arg string) byte {
 }
 
 //DoManageLogin 管理员登录(荷官或者监控人员)
-func DoManageLogin(game IGame, p *Player, s chan []byte, cmd, tableid int, args, arg string) byte {
+func DoManageLogin(game IGame, c *Client, cmd, tableid int, args, arg string) byte {
 	switch cmd {
 	case 1000:
-		return ManageIn(game, p, s, args, arg, tableid)
+		return ManageIn(game, c, args, arg, tableid)
 	case 999:
-		return MoniIn(game, p, s, args, arg, tableid)
+		return MoniIn(game, c, args, arg, tableid)
 	default:
 		return 1
 	}
@@ -103,10 +100,8 @@ func DoManageLogin(game IGame, p *Player, s chan []byte, cmd, tableid int, args,
 }
 
 //ManageIn 荷官登录
-func ManageIn(game IGame, p *Player, s chan []byte, pwd, dealer string, tableid int) byte {
-	defer func() {
-		util.Log.Debug("success")
-	}()
+func ManageIn(game IGame, c *Client, pwd, dealer string, tableid int) byte {
+	util.Log.Debug(pwd)
 	table := game.FindTable(tableid)
 	pwd = strings.TrimSuffix(pwd, "#")
 	pwds := strings.Split(pwd, "#")
@@ -114,20 +109,24 @@ func ManageIn(game IGame, p *Player, s chan []byte, pwd, dealer string, tableid 
 		return 1
 	}
 	if !strings.EqualFold(pwds[0], table.Conf.Password) {
-		p = NewPlayer()
+		c.P = nil
 		return 1
 	}
-	p.Home = table.Num
-	p.Type = -1
-	p.Send = s
+	if c.P == nil {
+		c.P = NewPlayer()
+	}
+	c.P.Home = table.Num
+	c.P.Type = -1
+	c.P.Send = c.Send
 	if table.Conf.Manager != nil {
-		if table.Conf.Manager.Send != nil && table.Conf.Manager.Send != p.Send {
+		if table.Conf.Manager.Send != nil && table.Conf.Manager.Send != c.P.Send {
 			table.Conf.Manager.Send <- nil
 		}
 	}
 	table.Statu.IsOpen = 1
-	table.Conf.Manager = p
+	table.Conf.Manager = c.P
 	table.Conf.Dealer = dealer
+	util.Log.Debug(dealer)
 	strs := strings.Split(dealer, "#")
 	if len(strs) > 6 {
 		//历史记录同步
@@ -136,7 +135,7 @@ func ManageIn(game IGame, p *Player, s chan []byte, pwd, dealer string, tableid 
 		//发送大厅消息
 		game.SendHallMsg(table.MakeMsg(false))
 	}
-	game.EnterRoom(p, -1, tableid)
+	game.EnterRoom(c.P, -1, tableid)
 	//更新stage历史记录
 	models.UpdateStageHistoryDealer(table.Game, table.Num, true, table.Conf.Dealer)
 	if len(pwds) > 1 {
@@ -147,22 +146,22 @@ func ManageIn(game IGame, p *Player, s chan []byte, pwd, dealer string, tableid 
 }
 
 //MoniIn 监控人员登录
-func MoniIn(game IGame, p *Player, s chan []byte, pwd, dealer string, tableid int) byte {
+func MoniIn(game IGame, c *Client, pwd, dealer string, tableid int) byte {
 	table := game.FindTable(tableid)
 	if !strings.EqualFold(table.Conf.Password, pwd) {
-		p = nil
+		c.P = nil
 		return 1
 	}
-	if p == nil {
-		p = &Player{}
+	if c.P == nil {
+		c.P = NewPlayer()
 	}
-	p.Home = table.Num
-	p.Type = -1
-	p.Send = s
+	c.P.Home = table.Num
+	c.P.Type = -1
+	c.P.Send = c.Send
 
-	game.EnterRoom(p, p.Type, tableid)
-	game.AddMoni(p, tableid)
+	game.EnterRoom(c.P, c.P.Type, tableid)
+	game.AddMoni(c.P, tableid)
 	//向监控者发送本桌玩家信息
-	go SendPlayerMsg(p, table)
+	go SendPlayerMsg(c.P, table)
 	return 0
 }

@@ -39,6 +39,7 @@ func NewStatus(betAreas int) *Status {
 	return &Status{
 		Bet:        make([]int, betAreas),
 		VirtualBet: make([]int, betAreas),
+		StartTime:  time.Now().Add(time.Duration(-36) * time.Second),
 	}
 }
 

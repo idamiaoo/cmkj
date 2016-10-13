@@ -212,6 +212,13 @@ func (game *BjlServer) settlement(tableID int, orders []*Game.BettingOrder, resu
 	if !issync {
 		go recordrun.Run()
 	}
+	//记录结果
+	table.Statu.WinLose = util.Round(table.Statu.WinLose, 2)
+	models.UpdateStageHistoryWinLose(table.Game, tableID, table.Statu.Status, table.His.Ways, table.His.Counts, table.Statu.WinLose)
+
+	table.DealerServe.ToDealerStatus()
+	table.DealerServe.ToShuffleStatus()
+
 	//结算记录
 	Game.ToOrderAll(orders)
 	//删除临时表
@@ -302,7 +309,7 @@ func (game *BjlServer) DoBet(p *Game.Player, name string, Type, counts, tableID 
 
 		//id := util.UIDGenerator.GetID(GThisnaem)
 
-		id := uidclient.NextUID(GThisnaem)
+		id := uidclient.NextUID(GThisname)
 		sid := strconv.FormatInt(id, 10)
 		//数据库扣费操作
 		money := -total
@@ -413,16 +420,10 @@ func (game *BjlServer) DoResult(tableID int, result, poker string) byte {
 
 	//异步结算
 	go game.settlement(tableID, table.Orders.Orders(), results, way, newid, table.Statu.GameID, false)
-	table.Statu.WinLose = util.Round(table.Statu.WinLose, 2)
-	table.Statu.Status = util.S_PAYOFF
-	table.Statu.PayTime = 6
-	//记录结果
-	models.UpdateStageHistoryWinLose(table.Game, tableID, table.Statu.Status, table.His.Ways, table.His.Counts, table.Statu.WinLose)
+	atomic.StoreInt32(&table.Statu.Status, util.S_PAYOFF)
+	atomic.StoreInt32(&table.Statu.PayTime, 6)
 
 	game.SendStatusToAll(1, tableID)
-	//删除临时表
-	table.DealerServe.ToDealerStatus()
-	table.DealerServe.ToShuffleStatus()
 	return 0
 }
 
@@ -509,8 +510,9 @@ func (game *BjlServer) DoChangeResult(tableID int, result, poker string) byte {
 		}
 		models.WriteResult(table.Game, tableID, stage, inning, table.Statu.StartTime, way, poker, newid, 1)
 		game.SendPlayerMsg(tableID)
+		models.UpdateStageHistoryWinLose(table.Game, tableID, table.Statu.Status, table.His.Ways, table.His.Counts, table.Statu.WinLose)
 	}()
-	models.UpdateStageHistoryWinLose(table.Game, tableID, table.Statu.Status, table.His.Ways, table.His.Counts, table.Statu.WinLose)
+
 	table.Statu.Poker = ""
 	if isOld == 0 {
 		game.SendStatusToAll(1, tableID)
@@ -554,7 +556,5 @@ func (game *BjlServer) DoSyncResult(tableID int, result, poker string) byte {
 	borders := orders.Orders()
 	oldid := borders[0].GameRecordID
 	go game.settlement(tableID, borders, results, way, newid, oldid, true)
-	table.DealerServe.ToDealerStatus()
-	table.DealerServe.ToShuffleStatus()
 	return 0
 }

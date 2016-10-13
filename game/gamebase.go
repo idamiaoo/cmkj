@@ -323,6 +323,8 @@ func (game *Base) CleanOrder(tableID int) {
 
 //SyncHistory 同步历史记录
 func (game *Base) SyncHistory(strs []string, tableID int) {
+	//荷官 ＋ "#" ＋ 当前靴 ＋ "#" ＋ 当前局 ＋ "#" ＋ 当前状态 ＋ "#" ＋ 倒计时 ＋ "#" ＋ 历史路单 ＋ "#" ＋ 桌面牌集 ＋ "#"
+	util.Log.Debug(strs)
 	table := game.Tables[tableID]
 	table.Conf.Dealer = strs[0]
 	shoe, _ := strconv.Atoi(strs[1])
@@ -331,7 +333,7 @@ func (game *Base) SyncHistory(strs []string, tableID int) {
 
 	table.Statu.Time = 0
 
-	isDef := false
+	var isDef bool
 
 	if shoe != table.Statu.Shoe || times != table.Statu.Game {
 		isDef = true
@@ -355,6 +357,7 @@ func (game *Base) SyncHistory(strs []string, tableID int) {
 	}
 
 	if isDef {
+		util.Log.Debug("isDef")
 		table.His.Ways = strs[5]
 		table.His.Last = "q" + strs[5]
 		table.His.Counts = waysCountWay(table.His.Tj, strs[5])

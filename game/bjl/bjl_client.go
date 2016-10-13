@@ -99,7 +99,6 @@ func handleClient(c *gin.Context) {
 	}
 	client := &BjlClient{
 		Client: Game.Client{
-			P:    Game.NewPlayer(),
 			Send: make(chan []byte, 256),
 			Conn: conn,
 			Game: Bjl,

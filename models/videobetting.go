@@ -7,7 +7,7 @@ import (
 )
 
 type VideoBetting struct {
-	ID                 int64     `gorm:"column:ID"`                 //[bigint]
+	ID                 int64     `gorm:"column:ID;primary_key"`     //[bigint]
 	UserID             int64     `gorm:"column:UserID"`             //[bigint]
 	UserName           string    `gorm:"column:UserName"`           //[nvarchar]
 	Path               string    `gorm:"column:Path"`               //[nvarchar]  会员层级路径
@@ -37,7 +37,7 @@ func (VideoBetting) TableName() string {
 }
 
 type VideoBettingTmp struct {
-	ID                 int64     `gorm:"column:ID"`                 //[bigint]
+	ID                 int64     `gorm:"column:ID;primary_key"`     //[bigint]
 	UserID             int64     `gorm:"column:UserID"`             //[bigint]
 	UserName           string    `gorm:"column:UserName"`           //[nvarchar]
 	Path               string    `gorm:"column:Path"`               //[nvarchar]  会员层级路径
@@ -69,17 +69,18 @@ func (VideoBettingTmp) TableName() string {
 }
 
 func (bet *VideoBettingTmp) Create() bool {
-	if err := DBEngine.Db.NewRecord(bet); !err {
-		util.Log.Error("create tmp order error ")
+	if err := DBEngine.Db.Create(bet).Error; err != nil {
+		util.Log.Errorf("create tmp order error :%v", err)
 		return false
 	}
+	util.Log.Debug("tmp sucess")
 	return true
 
 }
 
 func (bet *VideoBetting) Create() bool {
-	if err := BetEngine.Db.NewRecord(bet); !err {
-		util.Log.Error("create betorder error ")
+	if err := BetEngine.Db.Create(bet).Error; err != nil {
+		util.Log.Errorf("create betorder error :%v", err)
 		return false
 	}
 	return true
@@ -105,6 +106,7 @@ func ReadOrders(gameid, tableid, stage, inning int) []VideoBetting {
 		util.Log.Error(err)
 		return nil
 	}
+	util.Log.Debug(len(orders))
 	return orders
 }
 
@@ -132,9 +134,10 @@ func DeleteTmpWithName(name string, gameRecorID int64) bool {
 	return true
 }
 func GetTempNotPayoff(game, tableid int, exid int64) []VideoBettingTmp {
+	util.Log.Debug("GetTempNotPayoff")
 	var tmp []VideoBettingTmp
 	querysql := "id in (select max(id) from C_VideoBetting_temp where GameNameID=? and tableid=? and GameRecordID <> ?  group by GameRecordID)"
-	if err := DBEngine.Db.Where(querysql, game, tableid, exid).Error; err != nil {
+	if err := DBEngine.Db.Debug().Where(querysql, game, tableid, exid).Error; err != nil {
 		util.Log.Error(err)
 		return nil
 	}

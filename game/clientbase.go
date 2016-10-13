@@ -134,47 +134,66 @@ func (c *Client) disconnectHandler() {
 
 //DoLogin 客户端登录(玩家)
 func (c *Client) DoLogin(client IClient, num, t, platform int, name, pwd, xy, ip string) byte {
-
 	if num < 1 || num > c.Max {
 		util.Log.Errorf("num=%d\n", int(num))
 		return 1
 	}
 	var isFirst bool
+	if c.P == nil {
+		c.P = NewPlayer()
+		isFirst = true
+	}
 	p := c.P
 	p.Name = name
 	p.IP = ip
 	p.Platform = platform
 	p.Type = t
-	p.Game = 1
+	p.Game = GGame
 	p.Xy = xy
 	p.Send = c.Send
-	member, re := models.ReadMember(p.Name, pwd)
-	if re != 0 {
-		return re
-	}
-	p.ID = member.UserID
-	p.Balance = member.CurMoney1
-	p.ClassID = member.ClassID
-	p.Maxprofit = member.Maxprofit
-	p.IsLock = member.IsLock
-	p.Moneysort = member.MoneySort
-	p.LoginTime = string(time.Now().Unix())
-	p.PreSequence = member.PreSequence
-	var ids string
-	if p.Game == util.Roulette {
-		ids = member.RouletteBetLimitIDs
+	if isFirst {
+		member, re := models.ReadMember(p.Name, pwd)
+		if re != 0 {
+			c.P = nil
+			return re
+		}
+		p.ID = member.UserID
+		p.Balance = member.CurMoney1
+		p.ClassID = member.ClassID
+		p.Maxprofit = member.Maxprofit
+		p.IsLock = member.IsLock
+		p.Moneysort = member.MoneySort
+		p.LoginTime = string(time.Now().Unix())
+		p.PreSequence = member.PreSequence
+		p.Session = member.SessionID
+
+		var ids string
+		if p.Game == util.Roulette {
+			ids = member.RouletteBetLimitIDs
+		} else {
+			ids = member.VideoBetLimitIDs
+		}
+
+		if opt := models.ReadPreOpt(member.PreID); opt != nil {
+			p.PromotionOtherURL = opt.PromotionOtherURL
+		}
+		re = p.GetLimit(ids)
+		if re != 0 {
+			c.P = nil
+			return re
+		}
+		re = models.UpdateLoginInfo(ip, name, c.P.Game)
+		if re != 0 {
+			c.P = nil
+			return re
+		}
 	} else {
-		ids = member.VideoBetLimitIDs
-	}
-	re = p.GetLimit(ids)
-	if re != 0 {
-		c.P = nil
-		return re
-	}
-	re = models.UpdateLoginInfo(ip, name, c.P.Game)
-	if re != 0 {
-		c.P = nil
-		return re
+		member, re := models.ReadMember(p.Name, pwd)
+		if re != 0 {
+			c.P = nil
+			return re
+		}
+		p.Balance = member.CurMoney1
 	}
 	client.InTable(num, t)
 	return 0
@@ -223,7 +242,7 @@ func (c *Client) DoManLogin(num, cmd int, args, arg string) byte {
 	}
 
 	//房间管理登录处理
-	return DoManageLogin(c.Game, c.P, c.Send, cmd, num, args, arg)
+	return DoManageLogin(c.Game, c, cmd, num, args, arg)
 }
 
 //DoTips 牌桌小费(玩家)
@@ -249,7 +268,7 @@ func (c *Client) DoManCmd(num, cmd int, args, arg string) byte {
 		return 1
 	}
 	//房间管理命令处理
-	return DoManageCmd(c.Game, c.P, c.Send, cmd, num, args, arg)
+	return DoManageCmd(c.Game, c, cmd, num, args, arg)
 }
 
 //sendRe 客户端消息响应

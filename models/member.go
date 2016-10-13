@@ -27,6 +27,7 @@ type Member struct {
 	Maxprofit           float64 `gorm:"column:winPoint"`
 	IsLock              int     `gorm:"column:islock"`
 	PreSequence         string  `gorm:"column:pre_sequence"`
+	SessionID           string  `gorm:"column:sessionid"`
 }
 
 func (Member) TableName() string {

@@ -62,6 +62,10 @@ func OrderConvertToTmp(order *BettingOrder) *models.VideoBettingTmp {
 	tmp.UserName = order.UserName
 	tmp.Stage = order.Stage
 	tmp.Path = order.Path
+	tmp.GameNameID = order.GameNameID
+	tmp.GameKind = order.GameKind
+	tmp.GameBettingKind = order.GameBettingKind
+	tmp.GameBettingContent = order.GameBettingContent
 	tmp.GameRecordID = strconv.FormatInt(order.GameRecordID, 10)
 	tmp.TableID = strconv.Itoa(order.TableID)
 	tmp.OrderNumber = order.OrderNumber
@@ -75,6 +79,7 @@ func OrderConvertToTmp(order *BettingOrder) *models.VideoBettingTmp {
 	tmp.IP = order.IP
 	tmp.AddTime = order.AddTime
 	tmp.StartBetTime = order.StartTime
+	tmp.Createdate = time.Now()
 	return tmp
 }
 
@@ -143,7 +148,6 @@ func OrderToBettingOrder(tmp models.VideoBetting) *BettingOrder {
 //ToVideoBetting 下注单转成数据库下单揭露结构
 func ToVideoBetting(order *BettingOrder) *models.VideoBetting {
 	return &models.VideoBetting{
-		ID:                 order.ID,
 		UserID:             order.UserID,
 		UserName:           order.UserName,
 		Path:               order.Path,

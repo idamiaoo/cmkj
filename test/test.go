@@ -216,4 +216,6 @@ func main() {
 	string1 := "1@2@3@@"
 	fmt.Println(strings.TrimRight(string1, "@"))
 	fmt.Println(strings.TrimSuffix(string1, "@"))
+
+	string1 += "hello"
 }
